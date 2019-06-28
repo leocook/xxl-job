@@ -11,8 +11,10 @@ $(function() {
 	        data : function ( d ) {
 	        	var obj = {};
 	        	obj.jobGroup = $('#jobGroup').val();
+                obj.triggerStatus = $('#triggerStatus').val();
                 obj.jobDesc = $('#jobDesc').val();
 	        	obj.executorHandler = $('#executorHandler').val();
+                obj.author = $('#author').val();
 	        	obj.start = d.start;
 	        	obj.length = d.length;
                 return obj;
@@ -83,22 +85,16 @@ $(function() {
 	                { "data": 'author', "visible" : true, "width":'10%'},
 	                { "data": 'alarmEmail', "visible" : false},
 	                { 
-	                	"data": 'jobStatus',
+	                	"data": 'triggerStatus',
 						"width":'10%',
 	                	"visible" : true,
 	                	"render": function ( data, type, row ) {
-
                             // status
-	                		if (data && data != 'NONE') {
-                                if ('NORMAL' == data) {
-                                    return '<small class="label label-success" ><i class="fa fa-clock-o"></i>RUNNING</small>';
-                                } else {
-                                    return '<small class="label label-warning" >ERROR('+ data +')</small>';
-                                }
-							} else {
+                            if (1 == data) {
+                                return '<small class="label label-success" ><i class="fa fa-clock-o"></i>RUNNING</small>';
+                            } else {
                                 return '<small class="label label-default" ><i class="fa fa-clock-o"></i>STOP</small>';
-							}
-
+                            }
 	                		return data;
 	                	}
 	                },
@@ -109,15 +105,11 @@ $(function() {
 	                		return function(){
 	                			// status
 	                			var start_stop = "";
-                                if (row.jobStatus && row.jobStatus != 'NONE') {
-                                    if ('NORMAL' == row.jobStatus) {
-                                        start_stop = '<button class="btn btn-primary btn-xs job_operate" _type="job_pause" type="button">'+ I18n.jobinfo_opt_stop +'</button>  ';
-                                    } else {
-                                        start_stop = '<button class="btn btn-primary btn-xs job_operate" _type="job_pause" type="button">'+ I18n.jobinfo_opt_stop +'</button>  ';
-                                    }
+                                if (1 == row.triggerStatus ) {
+                                    start_stop = '<button class="btn btn-primary btn-xs job_operate" _type="job_pause" type="button">'+ I18n.jobinfo_opt_stop +'</button>  ';
                                 } else {
                                     start_stop = '<button class="btn btn-primary btn-xs job_operate" _type="job_resume" type="button">'+ I18n.jobinfo_opt_start +'</button>  ';
-                                }
+								}
 
 	                			// log url
 	                			var logUrl = base_url +'/joblog?jobId='+ row.id;
@@ -227,28 +219,15 @@ $(function() {
 				dataType : "json",
 				success : function(data){
 					if (data.code == 200) {
-
-						layer.open({
-							title: I18n.system_tips,
-                            btn: [ I18n.system_ok ],
-							content: typeName + I18n.system_success ,
-							icon: '1',
-							end: function(layero, index){
-								if (needFresh) {
-									//window.location.reload();
-									jobTable.fnDraw(false);
-								}
-							}
-						});
+                        layer.msg( typeName + I18n.system_success );
+                        if (needFresh) {
+                            //window.location.reload();
+                            jobTable.fnDraw(false);
+                        }
 					} else {
-						layer.open({
-							title: I18n.system_tips,
-                            btn: [ I18n.system_ok ],
-							content: (data.msg || typeName + I18n.system_fail ),
-							icon: '2'
-						});
+                        layer.msg( data.msg || typeName + I18n.system_fail );
 					}
-				},
+				}
 			});
 		});
 	});
@@ -276,19 +255,9 @@ $(function() {
                 if (data.code == 200) {
                     $('#jobTriggerModal').modal('hide');
 
-                    layer.open({
-                        title: I18n.system_tips,
-                        btn: [ I18n.system_ok ],
-                        content: I18n.jobinfo_opt_run + I18n.system_success ,
-                        icon: '1'
-                    });
+                    layer.msg( I18n.jobinfo_opt_run + I18n.system_success );
                 } else {
-                    layer.open({
-                        title: I18n.system_tips,
-                        btn: [ I18n.system_ok ],
-                        content: (data.msg || I18n.jobinfo_opt_run + I18n.system_fail ),
-                        icon: '2'
-                    });
+                    layer.msg( data.msg || I18n.jobinfo_opt_run + I18n.system_fail );
                 }
             }
         });
